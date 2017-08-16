@@ -76,11 +76,11 @@ limitations under the License.
           type: Number,
           value: 50,
         },
-        xRange: {
-          type:Array
+        xProp: {
+          type: String
         },
-        yRange: {
-          type:Array
+        yProp: {
+          type: String
         },
         zeroBase: {
           type:Boolean,
@@ -89,12 +89,21 @@ limitations under the License.
       },
 
       observers: [
-        'displayPoints(points, width, height, xRange, yRange)'
+        'displayPoints(points, width, height, xProp, yProp)'
       ],
 
-      displayPoints: function(points, width, height, xRange, yRange, zeroBase) {
+      displayPoints: function(points, width, height, xProp, yProp, zeroBase) {
+        var xRange = this.getRange(points, xProp);
+        var yRange = this.getRange(points, yProp);
         if(points && xRange && yRange) {
           displayGraphExample(points, this.$.sparkline, xRange, yRange, width, height, "basis", false, 0, 0, zeroBase);
+        }
+      },
+
+      getRange: function(points, prop) {
+        var range =  d3.extent(points, function(p) { return p[prop]; });
+        if( range[0] != undefined && range[1] != undefined) {
+          return range;
         }
       }
     });
