@@ -1,0 +1,73 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../sparkline-chart.html">
+</head>
+
+<body>
+  <test-fixture id="sparkline-chart-fixture">
+    <template>
+      <sparkline-chart>
+      </sparkline-chart>
+    </template>
+  </test-fixture>
+
+  <script>
+  suite('sparkline-chart tests', function() {
+    var element;
+
+    setup(function(done) {
+      element = fixture('sparkline-chart-fixture');
+      flush(done);
+    });
+
+    test('properties are initialized correctly', function() {
+      assert.deepEqual(element.points, []);
+      assert.equal(element.titleText, "");
+      assert.equal(element.width, 200);
+      assert.equal(element.height, 50);
+      assert.isUndefined(element.xProp);
+      assert.isUndefined(element.yProp);
+      assert.equal(element.zeroBase, false);
+    });
+
+    test('getRange returns correctly', function(done) {
+      var input = [
+        {"x": 2, "y":3},
+        {"x": 0, "y":5},
+        {"x": 4, "y":24},
+        {"x": 1, "y":15},
+        {"x": 5, "y":8},
+        {"x": 3, "y":2}
+      ]
+      var outputX = element.getRange(input,"x");
+      var outputY = element.getRange(input,"y");
+      flush( function() {
+        assert.deepEqual(outputX, [0,5]);
+        assert.deepEqual(outputY, [2,24]);
+        done();
+      });
+    });
+  });
+  </script>
+</body>
+</html>

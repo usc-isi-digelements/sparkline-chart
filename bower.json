@@ -1,0 +1,28 @@
+{
+  "name": "sparkline-chart",
+  "description": "A Polymer Element that displays a spark line chart.",
+  "version": "1.0.0",
+  "authors": [
+    "Next Century Corporation"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "d3"
+  ],
+  "main": "sparkline-chart.html",
+  "homepage": "https://github.com/DigElements/sparkline-chart/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.7.0",
+    "d3-import": "DigElements/d3-import#~1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
+    "web-component-tester": "^5.0.0"
+  }
+}
