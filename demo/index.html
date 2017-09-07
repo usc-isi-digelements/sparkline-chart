@@ -18,53 +18,56 @@ limitations under the License.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../sparkline-chart.html">
 </head>
 
 <body unresolved>
-  <template is="dom-bind" id="demo">
-    <div>
-      <p>sparkline-chart demo:</p>
-      <p>points: [
-      </br>
-      <template is="dom-repeat" items=[[testPoints]]>
-        </br><span>{"date":[[item.date]], "count":[[item.count]]}</span></br>
-      </template>
-      ]
-      </p>
-      <p>x-prop: 'formattedDate'</p>
-      <p>y-prop: 'count'</p>
+  <dom-bind>
+    <script>
+      (function(document) {
+        var domBind = document.querySelector('dom-bind');
 
-      <br/><br/>
+        var makeTestPoints = function () {
+          return [
+            {"date": new Date(2017, 01, 02) , "count": 0},
+            {"date": new Date(2017, 01, 09) , "count": 3},
+            {"date": new Date(2017, 01, 16) , "count": 5},
+            {"date": new Date(2017, 01, 23) , "count": 3},
+            {"date": new Date(2017, 01, 30) , "count": 9},
+            {"date": new Date(2017, 02, 06) , "count": 1},
+            {"date": new Date(2017, 02, 13) , "count": 9},
+            {"date": new Date(2017, 02, 20) , "count": 7},
+            {"date": new Date(2017, 02, 27) , "count": 1}
+          ];
+        }
 
-      <sparkline-chart
-        points="[[testPoints]]"
-        x-prop="date"
-        y-prop="count">
-      </sparkline-chart>
-    </div>
-  </template>
-  <script>
-    (function(document) {
-      var demo = document.querySelector('#demo');
+        domBind.testPoints = makeTestPoints();
+      })(document);
+    </script>
 
-      var makeTestPoints = function () {
-        return [
-          {"date": new Date(2017, 01, 02) , "count": 0},
-          {"date": new Date(2017, 01, 09) , "count": 3},
-          {"date": new Date(2017, 01, 16) , "count": 5},
-          {"date": new Date(2017, 01, 23) , "count": 3},
-          {"date": new Date(2017, 01, 30) , "count": 9},
-          {"date": new Date(2017, 02, 06) , "count": 1},
-          {"date": new Date(2017, 02, 13) , "count": 9},
-          {"date": new Date(2017, 02, 20) , "count": 7},
-          {"date": new Date(2017, 02, 27) , "count": 1}
-        ];
-      }
+    <template is="dom-bind" id="demo">
+      <div>
+        <p>sparkline-chart demo:</p>
+        <p>points: [
+        </br>
+        <template is="dom-repeat" items=[[testPoints]]>
+          </br><span>{"date":[[item.date]], "count":[[item.count]]}</span></br>
+        </template>
+        ]
+        </p>
+        <p>x-prop: 'formattedDate'</p>
+        <p>y-prop: 'count'</p>
 
-      demo.testPoints = makeTestPoints();
-    })(document);
-  </script>
+        <br/><br/>
+
+        <sparkline-chart
+          points="[[testPoints]]"
+          x-prop="date"
+          y-prop="count">
+        </sparkline-chart>
+      </div>
+    </template>
+  </dom-bind>
 </body>
 </html>
