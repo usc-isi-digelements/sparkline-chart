@@ -13,6 +13,37 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../d3-import/d3.html">
+
+<!--
+A Polymer Element that displays a spark line chart.
+
+### Example
+```js
+var testPoints = [
+  {"date": new Date(2017, 01, 02) , "count": 0},
+  {"date": new Date(2017, 01, 09) , "count": 3},
+  {"date": new Date(2017, 01, 16) , "count": 5},
+  {"date": new Date(2017, 01, 23) , "count": 3},
+  {"date": new Date(2017, 01, 30) , "count": 9},
+  {"date": new Date(2017, 02, 06) , "count": 1},
+  {"date": new Date(2017, 02, 13) , "count": 9},
+  {"date": new Date(2017, 02, 20) , "count": 7},
+  {"date": new Date(2017, 02, 27) , "count": 1}
+];
+```
+
+```html
+<sparkline-chart
+  points="[[testPoints]]"
+  x-prop="date"
+  y-prop="count">
+</sparkline-chart>
+```
+
+@demo demo/index.html
+-->
 
 <dom-module id="sparkline-chart">
   <template>
@@ -34,7 +65,7 @@ limitations under the License.
   </template>
 
   <script>
-    function displayGraphExample(data, id, xDomain, yDomain, width, height, interpolation, animate, updateDelay, transitionDelay, zeroBase) {
+    function displayGraphExample(data, id, xProp, yProp, xDomain, yDomain, width, height, interpolation, animate, updateDelay, transitionDelay, zeroBase) {
       if (zeroBase) {
         xDomain[0] = 0;
       }
@@ -45,8 +76,8 @@ limitations under the License.
       var x = d3.scale.linear().domain(xDomain).range(xRange);
       var y = d3.scale.linear().domain(yDomain).range(yRange);
       var line = d3.svg.line()
-                  .x(function(d) { return x(d.formattedDate); })
-                  .y(function(d) { return y(d.count); });
+                  .x(function(d) { return x(d[xProp]); })
+                  .y(function(d) { return y(d[yProp]); });
 
       graph.append("path").attr("d", line(data));
       graph.selectAll("path")
@@ -96,7 +127,7 @@ limitations under the License.
         var xRange = this.getRange(points, xProp);
         var yRange = this.getRange(points, yProp);
         if(points && xRange && yRange) {
-          displayGraphExample(points, this.$.sparkline, xRange, yRange, width, height, "basis", false, 0, 0, zeroBase);
+          displayGraphExample(points, this.$.sparkline, xProp, yProp, xRange, yRange, width, height, "basis", false, 0, 0, zeroBase);
         }
       },
 
