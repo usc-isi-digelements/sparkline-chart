@@ -124,6 +124,9 @@ var testPoints = [
       ],
 
       displayPoints: function(points, width, height, xProp, yProp, zeroBase) {
+        if (!points || !xProp || !yProp) {
+          return;
+        }
         var xRange = this.getRange(points, xProp);
         var yRange = this.getRange(points, yProp);
         if(points && xRange && yRange) {
