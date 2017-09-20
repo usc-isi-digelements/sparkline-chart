@@ -59,8 +59,8 @@ limitations under the License.
         {"x": 5, "y":8},
         {"x": 3, "y":2}
       ]
-      var outputX = element.getRange(input,"x");
-      var outputY = element.getRange(input,"y");
+      var outputX = element._getRange(input,"x");
+      var outputY = element._getRange(input,"y");
       flush( function() {
         assert.deepEqual(outputX, [0,5]);
         assert.deepEqual(outputY, [2,24]);

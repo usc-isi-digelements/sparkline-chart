@@ -89,30 +89,82 @@ var testPoints = [
       is: 'sparkline-chart',
 
       properties: {
+        /**
+         * (Required)
+         *
+         * An array of points to graph.
+         *
+         * @type {Array}
+         * @default []
+         */
         points: {
           type: Array,
           value: function () {
             return [];
           }
         },
+
+        /** 
+         * The graph's title to display.
+         *
+         * @type {String}
+         * @default ""
+         */
         titleText: {
           type: String,
           value: ""
         },
+
+        /** 
+         * The graph's width in px.
+         *
+         * @type {Number}
+         * @default 200
+         */
         width: {
           type: Number,
           value: 200,
         },
+
+        /**
+         * The graph's height in px. 
+         *
+         * @type {Number}
+         * @default 50
+         */
         height: {
           type: Number,
           value: 50,
         },
+
+        /**
+         * (Required)
+         * 
+         * The property of each point object that holds the x (domain) value.
+         *
+         * @type {String}
+         */
         xProp: {
           type: String
-        },
+        },        
+
+        /**
+         * (Required)
+         * 
+         * The property of each point object that holds the y (range) value.
+         *
+         * @type {String}
+         */
         yProp: {
           type: String
         },
+
+        /**
+         * Whether the graph should be scale so that the y axis starts at zero. 
+         *
+         * @type {Boolean}
+         * @default false
+         */
         zeroBase: {
           type:Boolean,
           value: false
@@ -123,18 +175,75 @@ var testPoints = [
         'displayPoints(points, width, height, xProp, yProp)'
       ],
 
+      /**
+       * @private
+       *
+       * Helper fuction, does the actually work of drawing the graph.
+       *
+       * @param {Array} data
+       * @param {String} xProp
+       * @param {String} yProp
+       * @param {Array} xDomain
+       * @param {Array} yDomain
+       * @param {Number} width
+       * @param {Number} height
+       * @param {Boolean} zeroBase
+       */
+      _drawGraph(data, xProp, yProp, xDomain, yDomain, width, height, zeroBase) {
+        var interpolation = "basis";
+        var animate = false;
+        var updateDelay = 0;
+        var transitionDelay = 0;
+
+        if (zeroBase) {
+          xDomain[0] = 0;
+        }
+
+        var graph = d3.select(this.$.sparkline).append("svg:svg").attr("width", "100%").attr("height", "100%");
+        var xRange = [0, width];
+        var yRange = [height, 0];
+        var x = d3.scale.linear().domain(xDomain).range(xRange);
+        var y = d3.scale.linear().domain(yDomain).range(yRange);
+        var line = d3.svg.line()
+                    .x(function(d) { return x(d[xProp]); })
+                    .y(function(d) { return y(d[yProp]); });
+
+        graph.append("path").attr("d", line(data));
+        graph.selectAll("path")
+          .data([data])
+          .attr("d", line);
+      },
+
+      /**
+       * Draws the graph from the data points.
+       *
+       * @param {Array} points
+       * @param {Number} width
+       * @param {Number} height
+       * @param {String} xProp
+       * @param {String} yProp
+       * @param {Boolean} zeroBase
+       */
       displayPoints: function(points, width, height, xProp, yProp, zeroBase) {
         if (!points || !xProp || !yProp) {
           return;
         }
-        var xRange = this.getRange(points, xProp);
-        var yRange = this.getRange(points, yProp);
+        var xRange = this._getRange(points, xProp);
+        var yRange = this._getRange(points, yProp);
         if(points && xRange && yRange) {
-          displayGraphExample(points, this.$.sparkline, xProp, yProp, xRange, yRange, width, height, "basis", false, 0, 0, zeroBase);
+          this._drawGraph(points, xProp, yProp, xRange, yRange, width, height, zeroBase);
         }
       },
 
-      getRange: function(points, prop) {
+      /**
+       * @private
+       *
+       * Calculates the range for a given property in a set of points.
+       *
+       * @param {Array} points
+       * @param {String} prop
+       */
+      _getRange: function(points, prop) {
         var range =  d3.extent(points, function(p) { return p[prop]; });
         if( range[0] != undefined && range[1] != undefined) {
           return range;
