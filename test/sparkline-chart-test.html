@@ -42,15 +42,13 @@ limitations under the License.
 
     test('properties are initialized correctly', function() {
       assert.deepEqual(element.points, []);
-      assert.equal(element.titleText, "");
-      assert.equal(element.width, 200);
-      assert.equal(element.height, 50);
+      assert.equal(element.styleClass, '');
       assert.isUndefined(element.xProp);
       assert.isUndefined(element.yProp);
       assert.equal(element.zeroBase, false);
     });
 
-    test('getRange returns correctly', function(done) {
+    test('_findDomain returns correctly', function() {
       var input = [
         {"x": 2, "y":3},
         {"x": 0, "y":5},
@@ -58,14 +56,11 @@ limitations under the License.
         {"x": 1, "y":15},
         {"x": 5, "y":8},
         {"x": 3, "y":2}
-      ]
-      var outputX = element.getRange(input,"x");
-      var outputY = element.getRange(input,"y");
-      flush( function() {
-        assert.deepEqual(outputX, [0,5]);
-        assert.deepEqual(outputY, [2,24]);
-        done();
-      });
+      ];
+      var outputX = element._findDomain(input, 'x');
+      var outputY = element._findDomain(input, 'y');
+      assert.deepEqual(outputX, [0,5]);
+      assert.deepEqual(outputY, [2,24]);
     });
   });
   </script>

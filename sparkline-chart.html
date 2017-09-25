@@ -13,13 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../d3-import/d3.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../paper-styles/color.html">
 
 <!--
 A Polymer Element that displays a spark line chart.
 
 ### Example
+
 ```js
 var testPoints = [
   {"date": new Date(2017, 01, 02) , "count": 0},
@@ -47,98 +51,294 @@ var testPoints = [
 
 <dom-module id="sparkline-chart">
   <template>
+    <style include="iron-flex"></style>
+
     <style>
+      :host {
+        @apply --layout-horizontal;
+        @apply --layout-flex-auto;
+      }
+
       svg {
         fill: none;
-        stroke-width: 0.5px;
-        stroke: steelblue;
+        stroke: #111;
         stroke-width: 1;
-        fill: none;
-        width: 100%;
+      }
+
+      svg.amber {
+        stroke: var(--paper-amber-600);
+      }
+
+      svg.black {
+        stroke: #111;
+      }
+
+      svg.blue {
+        stroke: var(--paper-blue-600);
+      }
+
+      svg.blue-grey {
+        stroke: var(--paper-blue-grey-600);
+      }
+
+      svg.brown {
+        stroke: var(--paper-brown-600);
+      }
+
+      svg.cyan {
+        stroke: var(--paper-cyan-600);
+      }
+
+      svg.deep-orange {
+        stroke: var(--paper-deep-orange-600);
+      }
+
+      svg.deep-purple {
+        stroke: var(--paper-deep-purple-600);
+      }
+
+      svg.green {
+        stroke: var(--paper-green-600);
+      }
+
+      svg.grey {
+        stroke: var(--paper-grey-600);
+      }
+
+      svg.indigo {
+        stroke: var(--paper-indigo-600);
+      }
+
+      svg.light-blue {
+        stroke: var(--paper-light-blue-600);
+      }
+
+      svg.light-green {
+        stroke: var(--paper-light-green-600);
+      }
+
+      svg.lime {
+        stroke: var(--paper-lime-600);
+      }
+
+      svg.orange {
+        stroke: var(--paper-orange-600);
+      }
+
+      svg.pink {
+        stroke: var(--paper-pink-600);
+      }
+
+      svg.purple {
+        stroke: var(--paper-purple-600);
+      }
+
+      svg.red {
+        stroke: var(--paper-red-600);
+      }
+
+      svg.teal {
+        stroke: var(--paper-teal-600);
+      }
+
+      svg.white {
+        stroke: #fff;
+      }
+
+      svg.yellow {
+        stroke: var(--paper-yellow-600);
       }
     </style>
 
-    <div class="layout vertical">
-      <svg id="sparkline" style="width:[[width]]; height:[[height]];"></svg>
-      <span>[[titleText]]</span>
-    </div>
+    <svg id="sparkline" class$="[[styleClass]]"></svg>
   </template>
 
   <script>
-    function displayGraphExample(data, id, xProp, yProp, xDomain, yDomain, width, height, interpolation, animate, updateDelay, transitionDelay, zeroBase) {
-      if (zeroBase) {
-        xDomain[0] = 0;
-      }
-
-      var graph = d3.select(id).append("svg:svg").attr("width", "100%").attr("height", "100%");
-      var xRange = [0, width];
-      var yRange = [height, 0];
-      var x = d3.scale.linear().domain(xDomain).range(xRange);
-      var y = d3.scale.linear().domain(yDomain).range(yRange);
-      var line = d3.svg.line()
-                  .x(function(d) { return x(d[xProp]); })
-                  .y(function(d) { return y(d[yProp]); });
-
-      graph.append("path").attr("d", line(data));
-      graph.selectAll("path")
-        .data([data])
-        .attr("d", line);
-    }
-
     Polymer({
       is: 'sparkline-chart',
 
       properties: {
+        /**
+         * (Required)
+         *
+         * An array of points to chart.
+         *
+         * @type {Array}
+         * @default []
+         */
         points: {
           type: Array,
           value: function () {
             return [];
           }
         },
-        titleText: {
+
+        /**
+         * (Optional)
+         *
+         * The style class for the chart.
+         *
+         * @type {String}
+         */
+        styleClass: {
           type: String,
-          value: ""
+          value: ''
         },
-        width: {
-          type: Number,
-          value: 200,
-        },
-        height: {
-          type: Number,
-          value: 50,
-        },
+
+        /**
+         * (Required)
+         *
+         * The property of each point object that holds the x (domain) value.
+         *
+         * @type {String}
+         */
         xProp: {
           type: String
         },
+
+        /**
+         * (Required)
+         *
+         * The property of each point object that holds the y (range) value.
+         *
+         * @type {String}
+         */
         yProp: {
           type: String
         },
+
+        /**
+         * (Optional)
+         *
+         * Whether the chart should be scale so that the y axis starts at zero.
+         *
+         * @type {Boolean}
+         * @default false
+         */
         zeroBase: {
-          type:Boolean,
+          type: Boolean,
           value: false
+        },
+
+        /**
+         * The unique ID of this sparkline chart.
+         *
+         * @type {Number}
+         * @private
+         */
+        _uuid: {
+          type: Number,
+          value: function() {
+            return Math.random();
+          }
         }
       },
 
       observers: [
-        'displayPoints(points, width, height, xProp, yProp)'
+        'draw(points, xProp, yProp, zeroBase)'
       ],
 
-      displayPoints: function(points, width, height, xProp, yProp, zeroBase) {
-        if (!points || !xProp || !yProp) {
-          return;
+      attached: function() {
+        var self = this;
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          self.redraw();
+        });
+      },
+
+      /**
+       * Draws the sparkline chart using D3.
+       *
+       * @param {Array} data
+       * @param {String} xProp
+       * @param {String} yProp
+       * @param {Array} xDomain
+       * @param {Array} yDomain
+       * @param {Boolean} zeroBase
+       * @private
+       */
+      _drawSparklineChart(data, xProp, yProp, xDomain, yDomain, zeroBase) {
+        d3.select(this.$.sparkline).attr('width', '100%').attr('height', '16px').append('path');
+        this._drawLine(data, xProp, yProp, xDomain, yDomain, zeroBase);
+
+        var self = this;
+        d3.select(window).on('resize.' + this._uuid, function() {
+          self.redraw();
+        });
+      },
+
+      /**
+       * Draws the line path using D3.
+       *
+       * @param {Array} data
+       * @param {String} xProp
+       * @param {String} yProp
+       * @param {Array} xDomain
+       * @param {Array} yDomain
+       * @param {Boolean} zeroBase
+       * @private
+       */
+      _drawLine: function(data, xProp, yProp, xDomain, yDomain, zeroBase) {
+        if(zeroBase) {
+          xDomain[0] = 0;
         }
-        var xRange = this.getRange(points, xProp);
-        var yRange = this.getRange(points, yProp);
-        if(points && xRange && yRange) {
-          displayGraphExample(points, this.$.sparkline, xProp, yProp, xRange, yRange, width, height, "basis", false, 0, 0, zeroBase);
+
+        var width = ((this ? parseInt(this.offsetWidth, 10) : 360) || 360) - 5;
+
+        var xRange = [0, width];
+        var yRange = [16, 0];
+        var x = d3.scale.linear().domain(xDomain).range(xRange);
+        var y = d3.scale.linear().domain(yDomain).range(yRange);
+
+        var line = d3.svg.line()
+          .x(function(d) { return x(d[xProp]); })
+          .y(function(d) { return y(d[yProp]); });
+
+        d3.select(this.$.sparkline).select('path')
+          .data([data])
+          .attr('d', line);
+      },
+
+      /**
+       * Calculates the domain for a given property in a set of points.
+       *
+       * @param {Array} points
+       * @param {String} prop
+       * @private
+       */
+      _findDomain: function(points, prop) {
+        var range =  d3.extent(points, function(p) { return p[prop]; });
+        if(range[0] != undefined && range[1] != undefined) {
+          return range;
         }
       },
 
-      getRange: function(points, prop) {
-        var range =  d3.extent(points, function(p) { return p[prop]; });
-        if( range[0] != undefined && range[1] != undefined) {
-          return range;
+      /**
+       * Draws the sparkline chart from the data points.
+       *
+       * @param {Array} points
+       * @param {String} xProp
+       * @param {String} yProp
+       * @param {Boolean} zeroBase
+       */
+      draw: function(points, xProp, yProp, zeroBase) {
+        if(!points || !xProp || !yProp) {
+          return;
         }
+        var xDomain = this._findDomain(points, xProp);
+        var yDomain = this._findDomain(points, yProp);
+        this._drawSparklineChart(points, xProp, yProp, xDomain, yDomain, zeroBase);
+      },
+
+      /**
+       * Redraws the sparkline chart from the data points.
+       */
+      redraw: function() {
+        if(!this.points || !this.xProp || !this.yProp) {
+          return;
+        }
+        var xDomain = this._findDomain(this.points, this.xProp);
+        var yDomain = this._findDomain(this.points, this.yProp);
+        this._drawLine(this.points, this.xProp, this.yProp, xDomain, yDomain, this.zeroBase);
       }
     });
   </script>
