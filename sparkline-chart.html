@@ -154,6 +154,9 @@ var testPoints = [
   </template>
 
   <script>
+  (function() {
+    'use strict';
+
     Polymer({
       is: 'sparkline-chart',
 
@@ -341,5 +344,6 @@ var testPoints = [
         this._drawLine(this.points, this.xProp, this.yProp, xDomain, yDomain, this.zeroBase);
       }
     });
+  })();
   </script>
 </dom-module>
