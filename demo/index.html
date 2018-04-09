@@ -26,45 +26,49 @@ limitations under the License.
   <dom-bind>
     <script>
       (function(document) {
-        var domBind = document.querySelector('dom-bind');
+        var demo = document.querySelector('dom-bind');
 
-        var makeTestPoints = function () {
-          return [
-            {"date": new Date(2017, 01, 02) , "count": 0},
-            {"date": new Date(2017, 01, 09) , "count": 3},
-            {"date": new Date(2017, 01, 16) , "count": 5},
-            {"date": new Date(2017, 01, 23) , "count": 3},
-            {"date": new Date(2017, 01, 30) , "count": 9},
-            {"date": new Date(2017, 02, 06) , "count": 1},
-            {"date": new Date(2017, 02, 13) , "count": 9},
-            {"date": new Date(2017, 02, 20) , "count": 7},
-            {"date": new Date(2017, 02, 27) , "count": 1}
-          ];
-        }
-
-        domBind.testPoints = makeTestPoints();
+        demo.points = [
+          {'date': new Date(2018, 01, 01), 'count': 0},
+          {'date': new Date(2018, 01, 08), 'count': 3},
+          {'date': new Date(2018, 01, 15), 'count': 6},
+          {'date': new Date(2018, 01, 22), 'count': 9},
+          {'date': new Date(2018, 01, 29), 'count': 0},
+          {'date': new Date(2018, 02, 05), 'count': 1},
+          {'date': new Date(2018, 02, 12), 'count': 8},
+          {'date': new Date(2018, 02, 19), 'count': 9},
+          {'date': new Date(2018, 02, 26), 'count': 4},
+          {'date': new Date(2018, 03, 05), 'count': 5},
+          {'date': new Date(2018, 03, 12), 'count': 6},
+          {'date': new Date(2018, 03, 19), 'count': 7},
+          {'date': new Date(2018, 03, 26), 'count': 9},
+          {'date': new Date(2018, 04, 02), 'count': 9},
+          {'date': new Date(2018, 04, 09), 'count': 0},
+          {'date': new Date(2018, 04, 16), 'count': 0},
+          {'date': new Date(2018, 04, 23), 'count': 4},
+          {'date': new Date(2018, 04, 30), 'count': 8}
+        ];
       })(document);
     </script>
 
     <template is="dom-bind" id="demo">
       <div>
-        <p>sparkline-chart demo:</p>
-        <p>points: [
+        <p>Points: [
         </br>
-        <template is="dom-repeat" items=[[testPoints]]>
-          </br><span>{"date":[[item.date]], "count":[[item.count]]}</span></br>
+        <template is="dom-repeat" items=[[points]]>
+          </br><span>{'date':[[item.date]], 'count':[[item.count]]}</span></br>
         </template>
         ]
         </p>
-        <p>x-prop: 'formattedDate'</p>
-        <p>y-prop: 'count'</p>
+        <p>X-Property: 'date'</p>
+        <p>Y-Property: 'count'</p>
 
-        <br/><br/>
+        <br/>
 
         <sparkline-chart
-          points="[[testPoints]]"
-          x-prop="date"
-          y-prop="count">
+          points="[[points]]"
+          x-property="date"
+          y-property="count">
         </sparkline-chart>
       </div>
     </template>

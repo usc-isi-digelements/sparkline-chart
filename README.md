@@ -20,8 +20,9 @@ var testPoints = [
 ```html
 <sparkline-chart
   points="[[testPoints]]"
-  x-prop="date"
-  y-prop="count">
+  x-property="date"
+  y-property="count"
+  y-top="10">
 </sparkline-chart>
 ```
 

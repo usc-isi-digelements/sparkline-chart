@@ -1,7 +1,7 @@
 {
   "name": "sparkline-chart",
-  "description": "A Polymer Element that displays a spark line chart.",
-  "version": "2.1.1",
+  "description": "A Polymer Element that shows a sparkline.",
+  "version": "2.2.0",
   "authors": [
     "Next Century Corporation"
   ],
@@ -19,7 +19,9 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
-    "d3-import": "DigElements/d3-import#~1.0.0"
+    "d3-import": "DigElements/d3-import#~1.0.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
+    "paper-styles": "PolymerElements/paper-styles#^2.0.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^2.0.0",

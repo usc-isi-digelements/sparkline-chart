@@ -20,7 +20,7 @@ limitations under the License.
 <link rel="import" href="../paper-styles/color.html">
 
 <!--
-A Polymer Element that displays a spark line chart.
+A Polymer Element that shows a sparkline.
 
 ### Example
 
@@ -41,8 +41,9 @@ var testPoints = [
 ```html
 <sparkline-chart
   points="[[testPoints]]"
-  x-prop="date"
-  y-prop="count">
+  x-property="date"
+  y-property="count"
+  y-top="10">
 </sparkline-chart>
 ```
 
@@ -51,106 +52,119 @@ var testPoints = [
 
 <dom-module id="sparkline-chart">
   <template>
-    <style include="iron-flex"></style>
+    <style include="iron-flex iron-flex-alignment"></style>
 
     <style>
       :host {
-        @apply --layout-horizontal;
-        @apply --layout-flex-auto;
+        display: flex;
       }
 
       svg {
         fill: none;
-        stroke: #111;
-        stroke-width: 1;
+        stroke: #212121;
+        stroke-width: 2;
       }
 
-      svg.amber {
+      .labels {
+        margin-left: 5px;
+      }
+
+      .labels > span {
+        font-size: 9px;
+        text-align: end;
+      }
+
+      svg.amber .line {
         stroke: var(--paper-amber-600);
       }
 
-      svg.black {
-        stroke: #111;
+      svg.black .line {
+        stroke: #212121;
       }
 
-      svg.blue {
+      svg.blue .line {
         stroke: var(--paper-blue-600);
       }
 
-      svg.blue-grey {
+      svg.blue-grey .line {
         stroke: var(--paper-blue-grey-600);
       }
 
-      svg.brown {
+      svg.brown .line {
         stroke: var(--paper-brown-600);
       }
 
-      svg.cyan {
+      svg.cyan .line {
         stroke: var(--paper-cyan-600);
       }
 
-      svg.deep-orange {
+      svg.deep-orange .line {
         stroke: var(--paper-deep-orange-600);
       }
 
-      svg.deep-purple {
+      svg.deep-purple .line {
         stroke: var(--paper-deep-purple-600);
       }
 
-      svg.green {
+      svg.green .line {
         stroke: var(--paper-green-600);
       }
 
-      svg.grey {
+      svg.grey .line {
         stroke: var(--paper-grey-600);
       }
 
-      svg.indigo {
+      svg.indigo .line {
         stroke: var(--paper-indigo-600);
       }
 
-      svg.light-blue {
+      svg.light-blue .line {
         stroke: var(--paper-light-blue-600);
       }
 
-      svg.light-green {
+      svg.light-green .line {
         stroke: var(--paper-light-green-600);
       }
 
-      svg.lime {
+      svg.lime .line {
         stroke: var(--paper-lime-600);
       }
 
-      svg.orange {
+      svg.orange .line {
         stroke: var(--paper-orange-600);
       }
 
-      svg.pink {
+      svg.pink .line {
         stroke: var(--paper-pink-600);
       }
 
-      svg.purple {
+      svg.purple .line {
         stroke: var(--paper-purple-600);
       }
 
-      svg.red {
+      svg.red .line {
         stroke: var(--paper-red-600);
       }
 
-      svg.teal {
+      svg.teal .line {
         stroke: var(--paper-teal-600);
       }
 
-      svg.white {
+      svg.white .line {
         stroke: #fff;
       }
 
-      svg.yellow {
+      svg.yellow .line {
         stroke: var(--paper-yellow-600);
       }
     </style>
 
-    <svg id="sparkline" class$="[[styleClass]]"></svg>
+    <svg id="sparkline" class$="[[styleClass]]" style$="width:calc(100% - 5px - [[_findLabelWidth(yTop)]]px);"></svg>
+
+    <div class="layout vertical labels" style$="width:[[_findLabelWidth(yTop)]]px;" title$="[[_createLabelTooltip(_dataYMinimum, _dataYMaximum, zeroBase)]]">
+      <span class="text-cell">[[_dataYMaximum]]</span>
+      <span class="text-cell">[[_dataYMinimum]]</span>
+    </div>
   </template>
 
   <script>
@@ -162,9 +176,35 @@ var testPoints = [
 
       properties: {
         /**
+         * (Optional)
+         *
+         * The height of the sparkline.
+         *
+         * @type {Number}
+         * @default 20
+         */
+        height: {
+          type: Number,
+          value: 20
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether the Y domain of the sparkline must be normalized with `yTop`.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        normalized: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * (Required)
          *
-         * An array of points to chart.
+         * An array of points to show.
          *
          * @type {Array}
          * @default []
@@ -179,7 +219,7 @@ var testPoints = [
         /**
          * (Optional)
          *
-         * The style class for the chart.
+         * The style class for the element.
          *
          * @type {String}
          */
@@ -195,7 +235,7 @@ var testPoints = [
          *
          * @type {String}
          */
-        xProp: {
+        xProperty: {
           type: String
         },
 
@@ -206,14 +246,27 @@ var testPoints = [
          *
          * @type {String}
          */
-        yProp: {
+        yProperty: {
           type: String
         },
 
         /**
          * (Optional)
          *
-         * Whether the chart should be scale so that the y axis starts at zero.
+         * The top value of the Y domain.  Used if normalized and for label width.  If 0, does not overwrite if normalized.
+         *
+         * @type {Number}
+         * @default 0
+         */
+        yTop: {
+          type: Number,
+          value: 0
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether the element should be scale so that the y axis starts at zero.
          *
          * @type {Boolean}
          * @default false
@@ -224,12 +277,32 @@ var testPoints = [
         },
 
         /**
-         * The unique ID of this sparkline chart.
+         * The maximum Y in the points.
          *
          * @type {Number}
          * @private
          */
-        _uuid: {
+        _dataYMaximum: {
+          type: Number
+        },
+
+        /**
+         * The minimum Y in the points.
+         *
+         * @type {Number}
+         * @private
+         */
+        _dataYMinimum: {
+          type: Number
+        },
+
+        /**
+         * The unique ID of this sparkline element.
+         *
+         * @type {Number}
+         * @private
+         */
+        _id: {
           type: Number,
           value: function() {
             return Math.random();
@@ -238,7 +311,7 @@ var testPoints = [
       },
 
       observers: [
-        'draw(points, xProp, yProp, zeroBase)'
+        'draw(points, xProperty, yProperty, zeroBase, height, normalized, yTop)'
       ],
 
       attached: function() {
@@ -249,99 +322,172 @@ var testPoints = [
       },
 
       /**
-       * Draws the sparkline chart using D3.
+       * Returns the label tooltip.
        *
-       * @param {Array} data
-       * @param {String} xProp
-       * @param {String} yProp
-       * @param {Array} xDomain
-       * @param {Array} yDomain
+       * @param {Number} min
+       * @param {Number} max
        * @param {Boolean} zeroBase
+       * @return {String}
        * @private
        */
-      _drawSparklineChart(data, xProp, yProp, xDomain, yDomain, zeroBase) {
-        d3.select(this.$.sparkline).attr('width', '100%').attr('height', '16px').append('path');
-        this._drawLine(data, xProp, yProp, xDomain, yDomain, zeroBase);
+      _createLabelTooltip: function(min, max, zeroBase) {
+        return (zeroBase || !min ? '' : 'MIN=' + min + ' ') + 'MAX=' + max;
+      },
 
-        var self = this;
-        d3.select(window).on('resize.' + this._uuid, function() {
-          self.redraw();
-        });
+      /**
+       * Draws the x-axis path using D3.
+       *
+       * @param {Array} data
+       * @param {String} xProperty
+       * @param {Array} xDomain
+       * @param {Number} height
+       * @private
+       */
+      _drawAxis: function(data, xProperty, xDomain, height) {
+        var xRange = [0, this._findElementWidth()];
+        console.log('xRange',xRange);
+        var x = d3.scale.linear().domain(xDomain).range(xRange);
+        var axis = d3.svg.line().x(function(d) { return x(d[xProperty]); }).y(function() { return height; });
+        d3.select(this.$.sparkline).select('path.axis').data([data]).attr('d', axis);
       },
 
       /**
        * Draws the line path using D3.
        *
        * @param {Array} data
-       * @param {String} xProp
-       * @param {String} yProp
+       * @param {String} xProperty
+       * @param {String} yProperty
        * @param {Array} xDomain
        * @param {Array} yDomain
-       * @param {Boolean} zeroBase
+       * @param {Number} height
        * @private
        */
-      _drawLine: function(data, xProp, yProp, xDomain, yDomain, zeroBase) {
-        if(zeroBase) {
-          xDomain[0] = 0;
-        }
-
-        var width = ((this ? parseInt(this.offsetWidth, 10) : 360) || 360) - 5;
-
-        var xRange = [0, width];
-        var yRange = [16, 0];
+      _drawLine: function(data, xProperty, yProperty, xDomain, yDomain, height) {
+        var xRange = [0, this._findElementWidth()];
+        console.log('xRange',xRange);
+        var yRange = [height, 0];
         var x = d3.scale.linear().domain(xDomain).range(xRange);
         var y = d3.scale.linear().domain(yDomain).range(yRange);
-
-        var line = d3.svg.line()
-          .x(function(d) { return x(d[xProp]); })
-          .y(function(d) { return y(d[yProp]); });
-
-        d3.select(this.$.sparkline).select('path')
-          .data([data])
-          .attr('d', line);
+        var line = d3.svg.line().x(function(d) { return x(d[xProperty]); }).y(function(d) { return y(d[yProperty]); });
+        d3.select(this.$.sparkline).select('path.line').data([data]).attr('d', line);
       },
 
       /**
        * Calculates the domain for a given property in a set of points.
        *
        * @param {Array} points
-       * @param {String} prop
+       * @param {String} property
        * @private
        */
-      _findDomain: function(points, prop) {
-        var range =  d3.extent(points, function(p) { return p[prop]; });
+      _findDomain: function(points, property) {
+        var range =  d3.extent(points, function(d) { return d[property]; });
         if(range[0] != undefined && range[1] != undefined) {
           return range;
         }
       },
 
       /**
-       * Draws the sparkline chart from the data points.
+       * Returns the width of this sparkline element.
        *
-       * @param {Array} points
-       * @param {String} xProp
-       * @param {String} yProp
-       * @param {Boolean} zeroBase
+       * @return {Number}
+       * @private
        */
-      draw: function(points, xProp, yProp, zeroBase) {
-        if(!points || !xProp || !yProp) {
-          return;
-        }
-        var xDomain = this._findDomain(points, xProp);
-        var yDomain = this._findDomain(points, yProp);
-        this._drawSparklineChart(points, xProp, yProp, xDomain, yDomain, zeroBase);
+      _findElementWidth: function() {
+        return ((this ? parseInt(this.offsetWidth, 10) : 360) || 360) - 5;
       },
 
       /**
-       * Redraws the sparkline chart from the data points.
+       * Returns the width for the minimum and maximum labels.
+       *
+       * @param {Number} yTop
+       * @return {Number}
+       * @private
        */
-      redraw: function() {
-        if(!this.points || !this.xProp || !this.yProp) {
+      _findLabelWidth: function(yTop) {
+        return Math.ceil(('' + yTop).length * 5.5);
+      },
+
+      /**
+       * Updates the given Y domain using the given Y max and zero base status and returns the new Y domain.
+       *
+       * @param {Array} yDomain
+       * @param {Number} yTop
+       * @param {Boolean} zeroBase
+       * @param {Boolean} normalized
+       * @return {Array}
+       * @private
+       */
+      _updateYDomain: function(yDomain, yTop, zeroBase, normalized) {
+        return [(zeroBase ? 0 : yDomain[0]), ((normalized ? yTop : yDomain[1]) || yDomain[1])];
+      },
+
+      /**
+       * Draws the sparkline element from the data points.
+       *
+       * @param {Array} points
+       * @param {String} xProperty
+       * @param {String} yProperty
+       * @param {Boolean} zeroBase
+       * @param {Number} height
+       * @param {Boolean} normalized
+       * @param {Number} yTop
+       */
+      draw: function(points, xProperty, yProperty, zeroBase, height, normalized, yTop) {
+        if(!points || !xProperty || !yProperty) {
           return;
         }
-        var xDomain = this._findDomain(this.points, this.xProp);
-        var yDomain = this._findDomain(this.points, this.yProp);
-        this._drawLine(this.points, this.xProp, this.yProp, xDomain, yDomain, this.zeroBase);
+
+        var xDomain = this._findDomain(points, xProperty);
+        var yDomain = this._findDomain(points, yProperty);
+
+        this._dataYMinimum = yDomain[0];
+        this._dataYMaximum = yDomain[1];
+
+        yDomain = this._updateYDomain(yDomain, yTop, zeroBase, normalized);
+
+        d3.select(this.$.sparkline).attr('width', '100%').attr('height', height + 'px');
+
+        if(!yDomain[0]) {
+          d3.select(this.$.sparkline).append('path').attr('class', 'axis');
+          this._drawAxis(this.points, this.xProperty, xDomain, height);
+        }
+
+        d3.select(this.$.sparkline).append('path').attr('class', 'line');
+        this._drawLine(points, xProperty, yProperty, xDomain, yDomain, height);
+
+        var self = this;
+        d3.select(window).on('resize.' + this._id, function() {
+          self.redraw();
+        });
+
+        if(normalized) {
+          d3.select(this.$.sparkline).on('mouseover', function() {
+            var unnormalizedDomain = self._updateYDomain(self._findDomain(points, yProperty), yTop, zeroBase, false);
+            self._drawLine(points, xProperty, yProperty, xDomain, unnormalizedDomain, height);
+          });
+
+          d3.select(this.$.sparkline).on('mouseout', function() {
+            self._drawLine(points, xProperty, yProperty, xDomain, yDomain, height);
+          });
+        }
+      },
+
+      /**
+       * Redraws the sparkline element from the data points.
+       */
+      redraw: function() {
+        if(!this.points || !this.xProperty || !this.yProperty) {
+          return;
+        }
+
+        var xDomain = this._findDomain(this.points, this.xProperty);
+        var yDomain = this._updateYDomain(this._findDomain(this.points, this.yProperty), this.yTop, this.zeroBase, this.normalized);
+
+        if(!yDomain[0]) {
+          this._drawAxis(this.points, this.xProperty, xDomain, this.height);
+        }
+
+        this._drawLine(this.points, this.xProperty, this.yProperty, xDomain, yDomain, this.height);
       }
     });
   })();
