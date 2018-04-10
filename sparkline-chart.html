@@ -345,7 +345,6 @@ var testPoints = [
        */
       _drawAxis: function(data, xProperty, xDomain, height) {
         var xRange = [0, this._findElementWidth()];
-        console.log('xRange',xRange);
         var x = d3.scale.linear().domain(xDomain).range(xRange);
         var axis = d3.svg.line().x(function(d) { return x(d[xProperty]); }).y(function() { return height; });
         d3.select(this.$.sparkline).select('path.axis').data([data]).attr('d', axis);
@@ -364,7 +363,6 @@ var testPoints = [
        */
       _drawLine: function(data, xProperty, yProperty, xDomain, yDomain, height) {
         var xRange = [0, this._findElementWidth()];
-        console.log('xRange',xRange);
         var yRange = [height, 0];
         var x = d3.scale.linear().domain(xDomain).range(xRange);
         var y = d3.scale.linear().domain(yDomain).range(yRange);

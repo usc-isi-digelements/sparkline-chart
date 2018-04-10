@@ -1,7 +1,7 @@
 {
   "name": "sparkline-chart",
   "description": "A Polymer Element that shows a sparkline.",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "authors": [
     "Next Century Corporation"
   ],
