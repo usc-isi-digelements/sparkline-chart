@@ -65,15 +65,6 @@ var testPoints = [
         stroke-width: 2;
       }
 
-      .labels {
-        margin-left: 5px;
-      }
-
-      .labels > span {
-        font-size: 9px;
-        text-align: end;
-      }
-
       svg.amber .line {
         stroke: var(--paper-amber-600);
       }
@@ -159,12 +150,7 @@ var testPoints = [
       }
     </style>
 
-    <svg id="sparkline" class$="[[styleClass]]" style$="width:calc(100% - 5px - [[_findLabelWidth(yTop)]]px);"></svg>
-
-    <div class="layout vertical labels" style$="width:[[_findLabelWidth(yTop)]]px;" title$="[[_createLabelTooltip(_dataYMinimum, _dataYMaximum, zeroBase)]]">
-      <span class="text-cell">[[_dataYMaximum]]</span>
-      <span class="text-cell">[[_dataYMinimum]]</span>
-    </div>
+    <svg id="sparkline" class$="[[styleClass]]"></svg>
   </template>
 
   <script>
@@ -229,25 +215,29 @@ var testPoints = [
         },
 
         /**
-         * (Required)
+         * (Optional)
          *
          * The property of each point object that holds the x (domain) value.
          *
          * @type {String}
+         * @default 'x'
          */
         xProperty: {
-          type: String
+          type: String,
+          value: 'x'
         },
 
         /**
-         * (Required)
+         * (Optional)
          *
          * The property of each point object that holds the y (range) value.
          *
          * @type {String}
+         * @default 'y'
          */
         yProperty: {
-          type: String
+          type: String,
+          value: 'y'
         },
 
         /**
@@ -277,26 +267,6 @@ var testPoints = [
         },
 
         /**
-         * The maximum Y in the points.
-         *
-         * @type {Number}
-         * @private
-         */
-        _dataYMaximum: {
-          type: Number
-        },
-
-        /**
-         * The minimum Y in the points.
-         *
-         * @type {Number}
-         * @private
-         */
-        _dataYMinimum: {
-          type: Number
-        },
-
-        /**
          * The unique ID of this sparkline element.
          *
          * @type {Number}
@@ -319,19 +289,6 @@ var testPoints = [
         Polymer.RenderStatus.afterNextRender(this, function() {
           self.redraw();
         });
-      },
-
-      /**
-       * Returns the label tooltip.
-       *
-       * @param {Number} min
-       * @param {Number} max
-       * @param {Boolean} zeroBase
-       * @return {String}
-       * @private
-       */
-      _createLabelTooltip: function(min, max, zeroBase) {
-        return (zeroBase || !min ? '' : 'MIN=' + min + ' ') + 'MAX=' + max;
       },
 
       /**
@@ -395,17 +352,6 @@ var testPoints = [
       },
 
       /**
-       * Returns the width for the minimum and maximum labels.
-       *
-       * @param {Number} yTop
-       * @return {Number}
-       * @private
-       */
-      _findLabelWidth: function(yTop) {
-        return Math.ceil(('' + yTop).length * 5.5);
-      },
-
-      /**
        * Updates the given Y domain using the given Y max and zero base status and returns the new Y domain.
        *
        * @param {Array} yDomain
@@ -437,9 +383,6 @@ var testPoints = [
 
         var xDomain = this._findDomain(points, xProperty);
         var yDomain = this._findDomain(points, yProperty);
-
-        this._dataYMinimum = yDomain[0];
-        this._dataYMaximum = yDomain[1];
 
         yDomain = this._updateYDomain(yDomain, yTop, zeroBase, normalized);
 
