@@ -12,14 +12,14 @@
     "d3"
   ],
   "main": "sparkline-chart.html",
-  "homepage": "https://github.com/DigElements/sparkline-chart/",
+  "homepage": "https://github.com/usc-isi-digelements/sparkline-chart/",
   "ignore": [
     "/.*",
     "/test/"
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
-    "d3-import": "DigElements/d3-import#~1.0.0",
+    "d3-import": "usc-isi-digelements/d3-import#~1.0.0",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
     "paper-styles": "PolymerElements/paper-styles#^2.0.0"
   },
